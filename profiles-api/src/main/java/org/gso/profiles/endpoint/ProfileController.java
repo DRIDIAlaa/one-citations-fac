@@ -72,7 +72,7 @@ public class ProfileController {
         return ResponseEntity.ok(profileService.updateProfile(profileDto.toModel()).toDto());
     }
 
-    @GetMapping
+    @GetMapping("/search")
     public ResponseEntity<PageDto<ProfileDto>> searchProfile(@RequestParam(required = false) String query,
                                                              @PageableDefault(size = 20) Pageable pageable) {
         Pageable checkedPageable  = checkPageSize(pageable);
@@ -84,7 +84,7 @@ public class ProfileController {
                 .body(pageResults);
     }
 
-    @GetMapping(params = "mail")
+    @GetMapping("/search/mail")
     public ResponseEntity<PageDto<ProfileDto>> searchByMail(@RequestParam String mail,
                                                              @PageableDefault(size = 20) Pageable pageable) {
         Page<ProfileModel> results = profileService.searchByMail(mail, pageable);
