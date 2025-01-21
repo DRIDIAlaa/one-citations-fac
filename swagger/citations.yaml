@@ -73,10 +73,37 @@ components:
           description: Données de la page
           items:
             $ref: '#/components/schemas/ProfileDto'
+    CitationDto:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Identifiant unique de la citation
+        text:
+          type: string
+          description: Le texte de la citation
+        authorId:
+          type: string
+          description: Identifiant de l'auteur
+        validatorId:
+          type: string
+          description: Identifiant du validateur
+        submissionDate:
+          type: string
+          format: date-time
+          description: La date et l'heure de soumission
+        modificationDate:
+          type: string
+          format: date-time
+          description: La date et l'heure de la dernière modification
+        validated:
+          type: boolean
+          description: Statut de validation de la citation
+
 security:
   - oAuthSample:
-    - profile
-    - email
+      - profile
+      - email
 paths:
   /profiles/current:
     get:
@@ -206,3 +233,64 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PageDto'
+  /citations/random:
+    get:
+      summary: Retourne une citation validée aléatoire
+      responses:
+        '200':
+          description: Citation aléatoire
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CitationDto'
+
+  /citations:
+    post:
+      summary: Soumettre une nouvelle citation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CitationDto'
+      responses:
+        '201':
+          description: Citation soumise avec succès
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CitationDto'
+
+  /citations/unvalidated:
+    get:
+      summary: Récupère toutes les citations non validées
+      security:
+        - oAuthSample: [ profile ]
+      responses:
+        '200':
+          description: Liste des citations non validées
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CitationDto'
+
+  /citations/{id}/validate:
+    put:
+      summary: Valider une citation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Identifiant de la citation à valider
+          schema:
+            type: string
+      security:
+        - oAuthSample: [ profile ]
+      responses:
+        '200':
+          description: Citation validée avec succès
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CitationDto'

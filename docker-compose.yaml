@@ -18,10 +18,19 @@ services:
       spring_profiles_active: security,docker
     depends_on:
       - mongo
+  citation:
+    build: ./citations-api
+    ports:
+      - 9081:8080
+    environment:
+      spring_profiles_active: security,docker
+    depends_on:
+      - mongo
+
   swagger:
     image: swaggerapi/swagger-ui
     environment:
-      SWAGGER_JSON: /doc/citations.yaml
+      SWAGGER_JSON: /doc/swagger-definition.yaml
       DEEP_LINKING: "true"
       OAUTH2_REDIRECT_URL: http://localhost:8888/oauth2-redirect.html
       OAUTH_CLIENT_ID: swagger
