@@ -1,5 +1,7 @@
 package org.gso.citations_api.endpoint;
 
+import com.github.rutledgepaulv.rqe.pipes.QueryConversionPipeline;
+import lombok.extern.slf4j.Slf4j;
 import org.gso.citations_api.dto.CitationDto;
 import org.gso.citations_api.service.CitationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,16 +16,25 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.time.LocalDateTime;
 import java.util.List;
 
+
+@Slf4j
 @RestController
-@RequestMapping("/api/v1/citations")
+@RequestMapping(
+        value = CitationController.PATH,
+        produces = MediaType.APPLICATION_JSON_VALUE
+)
+
 public class CitationController {
+    public static final String PATH = "/api/v1/citations";
+    public static int MAX_PAGE_SIZE = 200;
+    private QueryConversionPipeline pipeline = QueryConversionPipeline.defaultPipeline();
 
     private final CitationService citationService;
 
-    @Autowired
     public CitationController(CitationService citationService) {
         this.citationService = citationService;
     }
+
 
     @GetMapping("/random")
     public ResponseEntity<CitationDto> getRandomCitation() {

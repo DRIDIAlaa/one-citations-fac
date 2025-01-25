@@ -1,11 +1,10 @@
 package org.gso.citations_api.service;
 
+import lombok.RequiredArgsConstructor;
 import org.gso.citations_api.dto.CitationDto;
-import org.gso.citations_api.dto.ProfileDto;
 import org.gso.citations_api.model.CitationModel;
 import org.gso.citations_api.model.ProfileModel;
 import org.gso.citations_api.repository.CitationRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
 
@@ -14,22 +13,17 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class CitationService {
 
     private final CitationRepository citationRepository;
     private final ProfileService profileService;
-
-    @Autowired
-    public CitationService(CitationRepository citationRepository, ProfileService profileService) {
-        this.citationRepository = citationRepository;
-        this.profileService = profileService;
-    }
-
+    @Secured("moderator")
     public CitationModel getRandomCitation() {
         return citationRepository.findTopByOrderBySubmissionDateDesc();
     }
 
-    @Secured("ROLE_WRITER")
+    @Secured("WRITER")
     public CitationModel submitCitation(CitationModel citationModel) {
         CitationModel citation = new CitationModel();
         citation.setText(citationModel.getText());
