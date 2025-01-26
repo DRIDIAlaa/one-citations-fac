@@ -40,7 +40,7 @@ services:
       spring_profiles_active: security,docker
     depends_on:
       - mongo
-  image:
+  images:
     build: ./images-api
     ports:
       - 9082:8080
