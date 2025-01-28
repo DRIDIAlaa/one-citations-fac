@@ -78,28 +78,27 @@ components:
       properties:
         id:
           type: string
-          description: Identifiant unique de la citation
+          description: Unique identifier of the citation.
         text:
           type: string
-          description: Le texte de la citation
-        authorId:
+          description: The text of the citation.
+        writerName:
           type: string
-          description: Identifiant de l'auteur
-        validatorId:
+          description: The name of the writer who submitted the citation.
+        validatorName:
           type: string
-          description: Identifiant du validateur
+          description: The name of the validator who validated the citation.
         submissionDate:
           type: string
           format: date-time
-          description: La date et l'heure de soumission
+          description: The date and time when the citation was submitted, formatted as "YYYY-MM-DD HH:mm:ss".
         modificationDate:
           type: string
           format: date-time
-          description: La date et l'heure de la dernière modification
+          description: The date and time when the citation was last modified.
         validated:
           type: boolean
-          description: Statut de validation de la citation
-
+          description: Indicates whether the citation has been validated.
 security:
   - oAuthSample:
       - profile

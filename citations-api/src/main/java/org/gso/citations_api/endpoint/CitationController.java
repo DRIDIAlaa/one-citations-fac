@@ -42,16 +42,12 @@ public class CitationController {
         return ResponseEntity.ok(citationService.getRandomCitation().toDto());
     }
 
+    @PreAuthorize("hasRole('writer')")
     @PostMapping(consumes = { MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<CitationDto> submitCitation(@RequestBody CitationDto citationDto,
-                                                      Authentication authentication) {
-        // Get the current user's information from the Authentication object
-        // Add submission date
+    public ResponseEntity<CitationDto> submitCitation(@RequestBody CitationDto citationDto, Authentication authentication) {
         citationDto.setSubmissionDate(LocalDateTime.now());
-
-        // Save the citation
+        citationDto.setWriterName(authentication.getName());
         CitationDto createdCitation = citationService.submitCitation(citationDto.toModel()).toDto();
-
         return ResponseEntity
                 .created(
                         ServletUriComponentsBuilder.fromCurrentContextPath()
