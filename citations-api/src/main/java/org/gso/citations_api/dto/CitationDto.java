@@ -21,23 +21,10 @@ import java.time.LocalDateTime;
 public class CitationDto {
     private String id;
     private String text;
-    private String writerName;
-    private String validatorName;
-    @JsonSerialize(using = LocalDateTimeSerializer.class)
-    @JsonFormat(pattern = "YYYY-MM-DD HH:mm:ss")
-    private LocalDateTime submissionDate;
-    @CreatedDate
-    private LocalDateTime modificationDate;
-    private boolean validated; // To track validation status
     public CitationModel toModel() {
         return  CitationModel.builder()
                 .id(this.id)
                 .text(this.text)
-                .submissionDate(this.submissionDate)
-                .modificationDate(this.modificationDate)
-                .validated(this.validated)
-                .writerName(this.writerName)
-                .validatorName(this.validatorName)
                 .build();
     }
 

@@ -22,9 +22,7 @@ public class CitationModel {
     @Id
     private String id;
     private String text;
-    @DBRef
     private String writerName;
-    @DBRef
     private String validatorName;
     @Field("validated")
     private boolean validated; // To track validation status
@@ -37,11 +35,6 @@ public class CitationModel {
         return CitationDto.builder()
                 .id(this.id)
                 .text(this.text)
-                .submissionDate(this.submissionDate)
-                .modificationDate(this.modificationDate)
-                .validated(this.validated)
-                .writerName(this.writerName)
-                .validatorName(this.validatorName)
                 .build();
     }
 }

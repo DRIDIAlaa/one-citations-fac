@@ -20,13 +20,10 @@ public class CitationService {
         return citationRepository.findTopByOrderBySubmissionDateDesc();
     }
 
-    public CitationModel submitCitation(CitationModel citationModel) {
-        CitationModel citation = new CitationModel();
-        citation.setText(citationModel.getText());
-
-
-        citation.setSubmissionDate(LocalDateTime.now());
-        return citationRepository.save(citation);
+    public CitationModel submitCitation(CitationModel citationModel, String writerName) {
+        citationModel.setSubmissionDate(LocalDateTime.now());
+        citationModel.setWriterName(writerName);
+        return citationRepository.save(citationModel);
     }
 
 

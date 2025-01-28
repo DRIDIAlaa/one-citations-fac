@@ -3,6 +3,7 @@ package org.gso.citations_api.endpoint;
 import com.github.rutledgepaulv.rqe.pipes.QueryConversionPipeline;
 import lombok.extern.slf4j.Slf4j;
 import org.gso.citations_api.dto.CitationDto;
+import org.gso.citations_api.model.CitationModel;
 import org.gso.citations_api.service.CitationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -42,12 +43,10 @@ public class CitationController {
         return ResponseEntity.ok(citationService.getRandomCitation().toDto());
     }
 
-    @PreAuthorize("hasRole('writer')")
+    @PreAuthorize("hasAuthority('ROLE_writer')")
     @PostMapping(consumes = { MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<CitationDto> submitCitation(@RequestBody CitationDto citationDto, Authentication authentication) {
-        citationDto.setSubmissionDate(LocalDateTime.now());
-        citationDto.setWriterName(authentication.getName());
-        CitationDto createdCitation = citationService.submitCitation(citationDto.toModel()).toDto();
+    public ResponseEntity<CitationModel> submitCitation(@RequestBody CitationDto citationDto, Authentication authentication) {
+        CitationModel createdCitation = citationService.submitCitation(citationDto.toModel(), authentication.getName());
         return ResponseEntity
                 .created(
                         ServletUriComponentsBuilder.fromCurrentContextPath()
