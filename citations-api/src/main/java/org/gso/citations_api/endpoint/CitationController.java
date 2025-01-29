@@ -19,7 +19,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import java.time.LocalDateTime;
 import java.util.List;
 
-@CrossOrigin(origins = "http://localhost:8888")
+@CrossOrigin(origins = "http://localhost:8000")
 
 @Slf4j
 @RestController

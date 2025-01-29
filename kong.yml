@@ -1,0 +1,43 @@
+_format_version: "1.1"
+services:
+  - name: profiles-api
+    url: http://profile:8080/api/v1
+    routes:
+      - name: profiles-route
+        paths:
+          - /profiles
+    plugins:
+      - name: cors
+        config:
+          origins: ["http://localhost:8888"]  # Allow Swagger UI origin
+          methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+          headers: ["Accept", "Content-Type", "Authorization"]
+          credentials: true
+
+  - name: citations-api
+    url: http://citation:8080/api/v1
+    routes:
+      - name: citations-route
+        paths:
+          - /citations
+    plugins:
+      - name: cors
+        config:
+          origins: ["http://localhost:8888"]
+          methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+          headers: ["Accept", "Content-Type", "Authorization"]
+          credentials: true
+
+  - name: images-api
+    url: http://images:8080/api/v1
+    routes:
+      - name: images-route
+        paths:
+          - /images
+    plugins:
+      - name: cors
+        config:
+          origins: ["http://localhost:8888"]
+          methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+          headers: ["Accept", "Content-Type", "Authorization"]
+          credentials: true
