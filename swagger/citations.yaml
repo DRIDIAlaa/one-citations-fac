@@ -246,6 +246,9 @@ paths:
   /citations:
     post:
       summary: Soumettre une nouvelle citation
+      security:
+        - oAuthSample:
+            - [profile]
       requestBody:
         content:
           application/json:

@@ -8,9 +8,11 @@ import org.gso.citations_api.service.CitationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -43,9 +45,13 @@ public class CitationController {
         return ResponseEntity.ok(citationService.getRandomCitation().toDto());
     }
 
-    @PreAuthorize("hasAuthority('ROLE_writer')")
-    @PostMapping(consumes = { MediaType.APPLICATION_JSON_VALUE })
+    @PostMapping
     public ResponseEntity<CitationModel> submitCitation(@RequestBody CitationDto citationDto, Authentication authentication) {
+        System.out.println("User Authorities: " + authentication.getAuthorities());
+
+        if (!authentication.getAuthorities().contains(new SimpleGrantedAuthority("writer"))) {
+            throw new AccessDeniedException("Forbidden");
+        }
         CitationModel createdCitation = citationService.submitCitation(citationDto.toModel(), authentication.getName());
         return ResponseEntity
                 .created(
@@ -57,16 +63,20 @@ public class CitationController {
     }
 
     @GetMapping("/unvalidated")
-    @PreAuthorize("hasRole('moderator')")
-    public ResponseEntity<List<CitationDto>> getUnvalidatedCitations() {
+    public ResponseEntity<List<CitationDto>> getUnvalidatedCitations(Authentication authentication) {
+        if (!authentication.getAuthorities().contains(new SimpleGrantedAuthority("moderator"))) {
+            throw new AccessDeniedException("Forbidden");
+        }
         List<CitationDto> citations = citationService.getUnvalidatedCitations();
         return ResponseEntity.ok(citations);
     }
 
     @PutMapping("/{id}/validate")
-    @PreAuthorize("hasRole('moderator')")
     public ResponseEntity<CitationDto> validateCitation(@PathVariable String id,
                                                         Authentication authentication) {
+        if (!authentication.getAuthorities().contains(new SimpleGrantedAuthority("moderator"))) {
+            throw new AccessDeniedException("Forbidden");
+        }
         String moderatorId = authentication.getName();
         CitationDto validatedCitation = citationService.validateCitation(id, moderatorId);
         return ResponseEntity.ok(validatedCitation);
