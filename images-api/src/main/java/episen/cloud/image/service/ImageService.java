@@ -1,33 +1,38 @@
 package episen.cloud.image.service;
-
-import net.coobird.thumbnailator.Thumbnails;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class ImageService {
 
-    private final String IMAGE_DIR = "src/main/resources/images/";
+    private final ResourceLoader resourceLoader;
+    private final List<String> imageFiles = List.of("images/images.jpg", "images/téléchargement.jpg");
+
+    public ImageService(ResourceLoader resourceLoader) {
+        this.resourceLoader = resourceLoader;
+    }
 
     public BufferedImage getRandomImage(int width, int height) throws IOException {
-        File folder = new File(IMAGE_DIR);
-        File[] files = folder.listFiles((dir, name) -> name.endsWith(".jpg") || name.endsWith(".png"));
+        // Pick a random image from the list
+        String randomImagePath = imageFiles.get(new Random().nextInt(imageFiles.size()));
 
-        if (files == null || files.length == 0) {
-            throw new IOException("No images found in directory: " + IMAGE_DIR);
+        Resource resource = resourceLoader.getResource("classpath:" + randomImagePath);
+        if (!resource.exists()) {
+            throw new IOException("Image not found: " + randomImagePath);
         }
 
-        // Select a random image
-        Random random = new Random();
-        File randomImage = files[random.nextInt(files.length)];
-
-        // Resize the image
-        return Thumbnails.of(randomImage)
-                .size(width, height)
-                .asBufferedImage();
+        try (InputStream inputStream = resource.getInputStream()) {
+            return ImageIO.read(inputStream);
+        }
     }
 }

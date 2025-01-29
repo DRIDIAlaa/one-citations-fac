@@ -8,8 +8,10 @@ group = 'org.gso'
 version = '1.0.0-SNAPSHOT'
 
 repositories {
+	mavenLocal()
 	mavenCentral()
 	maven { url 'https://repo.spring.io/milestone' }
+	maven { url 'https://repo.spring.io/release' }
 }
 
 configurations {
@@ -19,7 +21,7 @@ configurations {
 }
 
 bootJar {
-	archiveFileName='application.jar'
+	archiveFileName = 'application.jar'
 }
 
 java {
@@ -28,24 +30,17 @@ java {
 	}
 }
 
-configurations {
-	compileOnly {
-		extendsFrom annotationProcessor
-	}
-}
-
 dependencies {
-	implementation 		'org.springframework.boot:spring-boot-starter-validation'
-	implementation      'net.coobird:thumbnailator:0.4.14'
-	implementation 		'org.springframework.boot:spring-boot-starter-web'
-	implementation 		'org.springframework.boot:spring-boot-starter-security'
-	implementation 		'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
-	implementation 		'com.github.rutledgepaulv:q-builders:1.6'
-	implementation 		'com.github.rutledgepaulv:rest-query-engine:0.7.1'
-	compileOnly 		'org.projectlombok:lombok'
-	developmentOnly 	'org.springframework.boot:spring-boot-devtools'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'net.coobird:thumbnailator:0.4.14'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'
+	implementation 'com.github.rutledgepaulv:q-builders:1.6'
+	implementation 'com.github.rutledgepaulv:rest-query-engine:0.7.1'
+	compileOnly 'org.projectlombok:lombok'
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	annotationProcessor 'org.projectlombok:lombok'
-	testImplementation 	'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
 tasks.named('test') {

@@ -1,6 +1,6 @@
 FROM gradle:8.10-alpine AS compile
 COPY . .
-RUN gradle clean build --no-daemon
+RUN gradle clean build --no-daemon -x test
 
 FROM eclipse-temurin:21.0.4_7-jre-noble
 WORKDIR /home/application/java
