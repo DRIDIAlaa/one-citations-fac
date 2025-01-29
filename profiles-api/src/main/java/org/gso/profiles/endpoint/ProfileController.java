@@ -1,7 +1,6 @@
 package org.gso.profiles.endpoint;
 
 import java.util.List;
-
 import com.github.rutledgepaulv.qbuilders.builders.GeneralQueryBuilder;
 import com.github.rutledgepaulv.qbuilders.conditions.Condition;
 import com.github.rutledgepaulv.qbuilders.visitors.MongoVisitor;
@@ -48,63 +47,77 @@ public class ProfileController {
     private final ProfileService profileService;
     private QueryConversionPipeline pipeline = QueryConversionPipeline.defaultPipeline();
 
+    // Méthode de création de profil, modifiée pour éviter de passer des informations redondantes
     @PostMapping(consumes = { MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<ProfileDto> createProfile(@RequestBody ProfileDto profileDto) {
-        ProfileDto createdProdile = profileService.createProfile(profileDto.toModel()).toDto();
+    public ResponseEntity<ProfileDto> createProfile(@RequestBody @NonNull ProfileDto profileDto, JwtAuthenticationToken principal) {
+        // L'ID de l'utilisateur authentifié est récupéré depuis le token JWT
+        profileDto.setUserId(principal.getName());  // Assurez-vous que le ProfileDto a un champ pour l'ID utilisateur
+
+        ProfileDto createdProfile = profileService.createProfile(profileDto.toModel()).toDto();
         return ResponseEntity
                 .created(
                         ServletUriComponentsBuilder.fromCurrentContextPath()
-                                .path(createdProdile.getId())
-                                .build()
+                                .path("/{id}")
+                                .buildAndExpand(createdProfile.getId())
                                 .toUri()
-                ).body(createdProdile);
+                ).body(createdProfile);
     }
 
+    // Méthode de récupération du profil d'un utilisateur
     @GetMapping("/{id}")
-    public ResponseEntity<ProfileDto> getProfile(@PathVariable("id") @NonNull String profileId) {
-        return ResponseEntity.ok(profileService.getProfile(profileId).toDto());
+    public ResponseEntity<ProfileDto> getProfile(@PathVariable("id") @NonNull String profileId, JwtAuthenticationToken principal) {
+        // Validation de l'accès à ce profil en fonction de l'utilisateur authentifié
+        ProfileModel profile = profileService.getProfile(profileId);
+        if (!profile.getUserId().equals(principal.getName())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        return ResponseEntity.ok(profile.toDto());
     }
 
+    // Mise à jour du profil, modifiée pour que l'utilisateur puisse modifier son propre profil uniquement
     @PutMapping(path = "/{id}", consumes = { MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<ProfileDto> updateProfile(@PathVariable @NonNull String profileId,
-                                                    @RequestBody @NonNull ProfileDto profileDto) {
+                                                    @RequestBody @NonNull ProfileDto profileDto, JwtAuthenticationToken principal) {
+        // Vérification que l'utilisateur authentifié peut modifier ce profil
+        if (!profileDto.getUserId().equals(principal.getName())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
         profileDto.setId(profileId);
-        return ResponseEntity.ok(profileService.updateProfile(profileDto.toModel()).toDto());
+        ProfileDto updatedProfile = profileService.updateProfile(profileDto.toModel()).toDto();
+        return ResponseEntity.ok(updatedProfile);
     }
 
+    // Recherche de profils - ici, on peut ajouter une vérification des droits d'accès en fonction du JWT
     @GetMapping("/search")
     public ResponseEntity<PageDto<ProfileDto>> searchProfile(@RequestParam(required = false) String query,
-                                                             @PageableDefault(size = 20) Pageable pageable) {
+                                                             @PageableDefault(size = 20) Pageable pageable, JwtAuthenticationToken principal) {
         Pageable checkedPageable  = checkPageSize(pageable);
         Criteria criteria = convertQuery(query);
         Page<ProfileModel> results = profileService.searchProfiles(criteria, checkedPageable);
         PageDto<ProfileDto> pageResults = toPageDto(results);
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(pageResults);
+        return ResponseEntity.status(HttpStatus.OK).body(pageResults);
     }
 
+    // Recherche par e-mail - si l'utilisateur ne peut pas voir certains profils, ajoutez une logique de permission ici
     @GetMapping("/search/mail")
     public ResponseEntity<PageDto<ProfileDto>> searchByMail(@RequestParam String mail,
-                                                             @PageableDefault(size = 20) Pageable pageable) {
+                                                            @PageableDefault(size = 20) Pageable pageable, JwtAuthenticationToken principal) {
+        // Optionnel : vérifier que l'utilisateur a la permission de rechercher par e-mail
         Page<ProfileModel> results = profileService.searchByMail(mail, pageable);
         PageDto<ProfileDto> pageResults = toPageDto(results);
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(pageResults);
+        return ResponseEntity.status(HttpStatus.OK).body(pageResults);
     }
 
+    // Récupérer le profil de l'utilisateur actuellement connecté
     @GetMapping("/current")
-    public ResponseEntity getCurrentUserProfile(JwtAuthenticationToken principal) {
-        return ResponseEntity.ok(principal);
+    public ResponseEntity<ProfileDto> getCurrentUserProfile(JwtAuthenticationToken principal) {
+        String userId = principal.getName();
+        ProfileDto currentUserProfile = profileService.getProfile(userId).toDto();
+        return ResponseEntity.ok(currentUserProfile);
     }
 
-    /**
-     * Convertit une requête RSQL en un objet Criteria compréhensible par la base
-     *
-     * @param stringQuery
-     * @return
-     */
+    // Convertir la requête RSQL en critères MongoDB
     private Criteria convertQuery(String stringQuery) {
         Criteria criteria;
         if (StringUtils.hasText(stringQuery)) {
@@ -116,6 +129,7 @@ public class ProfileController {
         return criteria;
     }
 
+    // Vérifier la taille de la page pour ne pas dépasser la taille maximale
     private Pageable checkPageSize(Pageable pageable) {
         if (pageable.getPageSize() > MAX_PAGE_SIZE) {
             return PageRequest.of(pageable.getPageNumber(), MAX_PAGE_SIZE);
@@ -123,6 +137,7 @@ public class ProfileController {
         return pageable;
     }
 
+    // Convertir une page de résultats en DTO pour la pagination
     private PageDto<ProfileDto> toPageDto(Page<ProfileModel> results) {
         List<ProfileDto> profiles = results.map(ProfileModel::toDto).toList();
         PageDto<ProfileDto> pageResults = new PageDto<>();
@@ -130,7 +145,6 @@ public class ProfileController {
         pageResults.setTotalElements(results.getTotalElements());
         pageResults.setPageSize(results.getSize());
         if (results.hasNext()) {
-            results.nextOrLastPageable();
             pageResults.setNext(
                     ServletUriComponentsBuilder.fromCurrentContextPath()
                             .queryParam("page", results.nextOrLastPageable().getPageNumber())

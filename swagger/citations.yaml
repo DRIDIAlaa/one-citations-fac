@@ -47,6 +47,36 @@ components:
       required:
         - userId
         - mail
+    ProfileDtoForAdmin:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Identifiant unique du profil
+        firstName:
+          type: string
+          description: Prénom de l'utilisateur
+        lastName:
+          type: string
+          description: Nom de famille de l'utilisateur
+        mail:
+          type: string
+          format: email
+          description: Adresse e-mail de l'utilisateur
+        phoneNumber:
+          type: string
+          description: Numéro de téléphone de l'utilisateur
+        age:
+          type: integer
+          description: Âge de l'utilisateur
+        created:
+          type: string
+          format: date-time
+          description: Date de création du profil
+        modified:
+          type: string
+          format: date-time
+          description: Date de dernière modification du profil
     PageDto:
       type: object
       properties:
@@ -113,10 +143,8 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  principal:
-                    type: object
+                $ref: '#/components/schemas/ProfileDtoForUser'
+
 
   /profiles/{id}:
     get:
@@ -134,28 +162,38 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProfileDto'
+                oneOf:
+                  - $ref: '#/components/schemas/ProfileDtoForUser'
+                  - $ref: '#/components/schemas/ProfileDtoForAdmin'
+        '403':
+          description: Accès interdit (l'utilisateur ne peut accéder qu'à son propre profil)
+        '404':
+          description: Profil non trouvé
     put:
       summary: Met à jour un profil existant
       parameters:
         - name: id
           in: path
           required: true
-          description: Identifiant du profil
+          description: Identifiant du profil à mettre à jour
           schema:
             type: string
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ProfileDto'
+              $ref: '#/components/schemas/ProfileDtoForUser'
       responses:
         '200':
           description: Profil mis à jour avec succès
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProfileDto'
+                $ref: '#/components/schemas/ProfileDtoForUser'
+        '403':
+          description: Accès interdit (l'utilisateur ne peut modifier que son propre profil)
+        '404':
+          description: Profil non trouvé
 
   /profiles:
     post:
