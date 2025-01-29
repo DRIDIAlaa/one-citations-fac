@@ -1,0 +1,60 @@
+_format_version: "1.1"
+services:
+  - name: profiles-api
+    url: http://profile:8080/api/v1
+    routes:
+      - name: profiles-route
+        paths:
+          - /api/v1/profiles
+    plugins:
+      - name: cors
+        config:
+          origins: ["http://localhost:8888"]  # Allow Swagger UI origin
+          methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]  # Include OPTIONS for preflight
+          headers: ["Accept", "Content-Type", "Authorization"]  # Allow Authorization header
+          credentials: true  # Allow credentials
+          preflight_continue: true  # Allow preflight requests to proceed
+      - name: oauth2
+        config:
+          scopes: ["profile", "email"]  # Required scopes
+          mandatory_scope: true  # Enforce scope validation
+          enable_authorization_code: true  # Enable authorization code flow
+          enable_client_credentials: true  # Enable client credentials flow
+          token_expiration: 7200  # Token expiration time in seconds
+
+  - name: citations-api
+    url: http://citation:8080/api/v1
+    routes:
+      - name: citations-route
+        paths:
+          - /api/v1/citations
+    plugins:
+      - name: cors
+        config:
+          origins: ["http://localhost:8888"]
+          methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+          headers: ["Accept", "Content-Type", "Authorization"]
+          credentials: true
+          preflight_continue: true
+      - name: oauth2
+        config:
+          scopes: ["profile", "email"]
+          mandatory_scope: true
+          enable_authorization_code: true
+          enable_client_credentials: true
+          token_expiration: 7200
+
+  - name: images-api
+    url: http://images:8080/api/v1
+    routes:
+      - name: images-route
+        paths:
+          - /api/v1
+    plugins:
+      - name: cors
+        config:
+          origins: ["http://localhost:8888"]
+          methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+          headers: ["Accept", "Content-Type", "Authorization"]
+          credentials: true
+          preflight_continue: true

@@ -1,25 +1,28 @@
 openapi: 3.0.0
 info:
   title: One Citations API
-  description: Notre super API pour notre application de gestions des citations
-  versin: 1.0.0
+  description: Notre super API pour notre application de gestion des citations et des images
+  version: 1.0.0
+
 servers:
-  - url: http://localhost:9081/api/v1
-    description: Environnement de test Docker
+  - url: http://localhost:8000/api/v1
+    description: Environnement de test avec Kong
   - url: http://localhost:9090/api/v1
     description: Environnement de test local
+
 components:
   securitySchemes:
-    oAuthSample:    # <---- arbitrary name
+    oAuthSample:
       type: oauth2
-      description: This API uses OAuth 2 with the implicit grant flow. [More info](https://api.example.com/docs/auth)
+      description: Cette API utilise OAuth 2 avec le flux d'autorisation. [Plus d'infos](https://api.example.com/docs/auth)
       flows:
-        authorizationCode:   # <---- OAuth flow(authorizationCode, implicit, password or clientCredentials)
+        authorizationCode:
           authorizationUrl: http://keycloak:8080/realms/one-citations/protocol/openid-connect/auth
           tokenUrl: http://keycloak:8080/realms/one-citations/protocol/openid-connect/token
           scopes:
-            profile: access profile
-            email: access email
+            profile: Accès au profil
+            email: Accès à l'email
+
   schemas:
     ProfileDto:
       type: object
@@ -47,32 +50,7 @@ components:
       required:
         - userId
         - mail
-    PageDto:
-      type: object
-      properties:
-        pageSize:
-          type: integer
-          description: Nombre d'éléments par page
-        totalElements:
-          type: integer
-          description: Nombre total d'éléments
-        next:
-          type: string
-          format: uri
-          description: URI pour la page suivante
-        first:
-          type: string
-          format: uri
-          description: URI pour la première page
-        last:
-          type: string
-          format: uri
-          description: URI pour la dernière page
-        data:
-          type: array
-          description: Données de la page
-          items:
-            $ref: '#/components/schemas/ProfileDto'
+
     CitationDto:
       type: object
       properties:
@@ -103,6 +81,7 @@ security:
   - oAuthSample:
       - profile
       - email
+
 paths:
   /profiles/current:
     get:
@@ -135,103 +114,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProfileDto'
-    put:
-      summary: Met à jour un profil existant
-      parameters:
-        - name: id
-          in: path
-          required: true
-          description: Identifiant du profil
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ProfileDto'
-      responses:
-        '200':
-          description: Profil mis à jour avec succès
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ProfileDto'
 
-  /profiles:
-    post:
-      summary: Crée un nouveau profil
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ProfileDto'
-      responses:
-        '201':
-          description: Profil créé avec succès
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ProfileDto'
-
-  /profiles/search:
-    get:
-      summary: Recherche des profils par query (RSQL)
-      parameters:
-        - name: query
-          in: query
-          required: false
-          description: Requête de recherche RSQL
-          schema:
-            type: string
-        - name: page
-          in: query
-          required: false
-          description: Numéro de la page
-          schema:
-            type: integer
-        - name: size
-          in: query
-          required: false
-          description: Taille de la page
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Résultats de la recherche
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PageDto'
-
-  /profiles/search/mail:
-    get:
-      summary: Recherche des profils par adresse e-mail
-      parameters:
-        - name: mail
-          in: query
-          required: true
-          description: Adresse e-mail à rechercher
-          schema:
-            type: string
-        - name: page
-          in: query
-          required: false
-          description: Numéro de la page
-          schema:
-            type: integer
-        - name: size
-          in: query
-          required: false
-          description: Taille de la page
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Résultats de la recherche par e-mail
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PageDto'
   /citations/random:
     get:
       summary: Retourne une citation validée aléatoire
@@ -262,37 +145,34 @@ paths:
               schema:
                 $ref: '#/components/schemas/CitationDto'
 
-  /citations/unvalidated:
+  /random-image:
     get:
-      summary: Récupère toutes les citations non validées
-      security:
-        - oAuthSample: [ profile ]
-      responses:
-        '200':
-          description: Liste des citations non validées
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/CitationDto'
-
-  /citations/{id}/validate:
-    put:
-      summary: Valider une citation
+      summary: Retourne une image aléatoire redimensionnée
+      description: Génère et retourne une image aléatoire avec les dimensions spécifiées.
       parameters:
-        - name: id
-          in: path
+        - name: width
+          in: query
           required: true
-          description: Identifiant de la citation à valider
+          description: Largeur de l'image en pixels
           schema:
-            type: string
-      security:
-        - oAuthSample: [ profile ]
+            type: integer
+            example: 300
+        - name: height
+          in: query
+          required: true
+          description: Hauteur de l'image en pixels
+          schema:
+            type: integer
+            example: 300
       responses:
         '200':
-          description: Citation validée avec succès
+          description: Image aléatoire retournée avec succès
           content:
-            application/json:
+            image/jpeg:
               schema:
-                $ref: '#/components/schemas/CitationDto'
+                type: string
+                format: binary
+        '400':
+          description: Requête invalide (dimensions incorrectes)
+        '500':
+          description: Erreur interne du serveur

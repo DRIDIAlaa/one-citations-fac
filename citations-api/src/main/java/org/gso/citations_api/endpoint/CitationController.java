@@ -15,11 +15,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-@CrossOrigin(origins = "http://localhost:8888")
+@CrossOrigin(origins = "http://localhost:8000")
 
 @Slf4j
 @RestController
@@ -41,8 +43,8 @@ public class CitationController {
 
 
     @GetMapping("/random")
-    public ResponseEntity<CitationDto> getRandomCitation() {
-        return ResponseEntity.ok(citationService.getRandomCitation().toDto());
+    public ResponseEntity getRandomCitation(JwtAuthenticationToken principal) {
+        return ResponseEntity.ok(principal);
     }
 
     @PostMapping
