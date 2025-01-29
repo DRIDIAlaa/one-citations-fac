@@ -13,6 +13,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -39,8 +41,8 @@ public class CitationController {
 
 
     @GetMapping("/random")
-    public ResponseEntity<CitationDto> getRandomCitation() {
-        return ResponseEntity.ok(citationService.getRandomCitation().toDto());
+    public ResponseEntity getRandomCitation(JwtAuthenticationToken principal) {
+        return ResponseEntity.ok(principal);
     }
 
     @PreAuthorize("hasAuthority('ROLE_writer')")
