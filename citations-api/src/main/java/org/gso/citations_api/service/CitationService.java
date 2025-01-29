@@ -3,7 +3,6 @@ package org.gso.citations_api.service;
 import lombok.RequiredArgsConstructor;
 import org.gso.citations_api.dto.CitationDto;
 import org.gso.citations_api.model.CitationModel;
-import org.gso.citations_api.model.ProfileModel;
 import org.gso.citations_api.repository.CitationRepository;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
@@ -17,23 +16,14 @@ import java.util.stream.Collectors;
 public class CitationService {
 
     private final CitationRepository citationRepository;
-    private final ProfileService profileService;
-    @Secured("moderator")
     public CitationModel getRandomCitation() {
         return citationRepository.findTopByOrderBySubmissionDateDesc();
     }
 
-    @Secured("WRITER")
-    public CitationModel submitCitation(CitationModel citationModel) {
-        CitationModel citation = new CitationModel();
-        citation.setText(citationModel.getText());
-
-        // Récupérer l'ID de l'auteur via le service ProfileService
-        ProfileModel author = profileService.getProfile(citationModel.getAuthorId());
-        citation.setAuthorId(author.getId()); // Stocker l'ID de l'auteur
-
-        citation.setSubmissionDate(LocalDateTime.now());
-        return citationRepository.save(citation);
+    public CitationModel submitCitation(CitationModel citationModel, String writerName) {
+        citationModel.setSubmissionDate(LocalDateTime.now());
+        citationModel.setWriterName(writerName);
+        return citationRepository.save(citationModel);
     }
 
 
@@ -44,12 +34,12 @@ public class CitationService {
                 .collect(Collectors.toList());
     }
 
-    public CitationDto validateCitation(String citationId, String moderatorId) {
+    public CitationDto validateCitation(String citationId, String moderatorName) {
         CitationModel citation = citationRepository.findById(citationId)
                 .orElseThrow(() -> new IllegalArgumentException("Citation not found"));
 
         citation.setValidated(true);
-        citation.setValidatorId(moderatorId);
+        citation.setValidatorName(moderatorName);
         citation.setModificationDate(LocalDateTime.now());
         citationRepository.save(citation);
 

@@ -9,7 +9,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.gso.citations_api.model.CitationModel;
-import org.gso.citations_api.model.ProfileModel;
 import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
@@ -22,23 +21,10 @@ import java.time.LocalDateTime;
 public class CitationDto {
     private String id;
     private String text;
-    private String authorId;
-    private String validatorId;
-    @JsonSerialize(using = LocalDateTimeSerializer.class)
-    @JsonFormat(pattern = "YYYY-MM-DD HH:mm:ss")
-    private LocalDateTime submissionDate;
-    @CreatedDate
-    private LocalDateTime modificationDate;
-    private boolean validated; // To track validation status
     public CitationModel toModel() {
         return  CitationModel.builder()
                 .id(this.id)
                 .text(this.text)
-                .submissionDate(this.submissionDate)
-                .modificationDate(this.modificationDate)
-                .validated(this.validated)
-                .authorId(this.authorId)
-                .validatorId(this.validatorId)
                 .build();
     }
 
