@@ -282,7 +282,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/CitationModel'
+                  $ref: '#/components/schemas/CitationDto'
 
   /citations/{id}/validate:
     put:
@@ -302,7 +302,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CitationModel'
+                $ref: '#/components/schemas/CitationDto'
   /random-image:
     get:
       summary: Retourne une image aléatoire redimensionnée
